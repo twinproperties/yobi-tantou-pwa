@@ -1,0 +1,9 @@
+{
+  "name": "予備試験 肢トレ",
+  "short_name": "予備肢トレ",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f6f8",
+  "theme_color": "#1b362d",
+  "icons": []
+}

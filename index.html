@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1b362d">
+<meta name="description" content="司法試験予備試験 短答式 肢別○×学習">
+<link rel="manifest" href="manifest.webmanifest">
+<title>予備試験 肢トレ</title>
+<style>
+:root{color-scheme:light;--ink:#172235;--muted:#697586;--line:#e2e7ed;--paper:#f4f6f8;--brand:#1b362d;--green:#16834a;--red:#c43d3d}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
+header{background:var(--brand);color:white;padding:calc(14px + env(safe-area-inset-top)) 18px 14px}
+h1{font-size:19px;margin:0;font-weight:750}header small{opacity:.75}
+main{max-width:680px;margin:0 auto;padding:18px 16px calc(28px + env(safe-area-inset-bottom))}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:18px;margin:0 0 14px;box-shadow:0 2px 10px #1b362d08}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:7px}
+select,button{font:inherit}select{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;background:white;color:var(--ink)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+button{border:0;border-radius:12px;padding:14px 12px;font-weight:700;cursor:pointer}
+.primary{background:var(--brand);color:white}.secondary{background:#edf1f5;color:var(--ink)}.ghost{background:white;border:1px solid var(--line);color:var(--ink)}
+button:disabled{opacity:.4;cursor:default}
+.meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px;margin-bottom:12px}
+.progress{height:5px;background:#e8edf1;border-radius:9px;overflow:hidden;margin-bottom:16px}.bar{height:100%;background:var(--green);width:0}
+.stem{font-size:13px;color:var(--muted);line-height:1.7;white-space:pre-wrap;margin-bottom:12px;background:#f8fafb;padding:10px 12px;border-radius:10px;border:1px solid #edf1f5}
+.stem:empty{display:none}
+.statement{font-size:18px;line-height:1.85;white-space:pre-wrap;overflow-wrap:anywhere}
+.answer{min-height:86px;display:flex;align-items:center;justify-content:center;font-size:64px;font-weight:800}
+.answer.correct{color:var(--green)}.answer.wrong{color:var(--red)}
+.hidden{display:none!important}.subtle{font-size:12px;color:var(--muted);line-height:1.7}
+.topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.star{font-size:13px;cursor:pointer;user-select:none}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:10px}
+@media(max-width:390px){.statement{font-size:16.5px}.panel{padding:15px}}
+</style>
+</head>
+<body>
+<header><h1>予備試験 肢トレ</h1><small>短答式試験 肢別○×演習</small></header>
+<main>
+<section id="setup" class="panel">
+  <h2 style="font-size:17px;margin:0 0 16px">学習する科目を選択</h2>
+  <label for="subject">科目</label>
+  <select id="subject">
+    <option value="CONSTITUTION">憲法</option>
+    <option value="ADMIN">行政法</option>
+    <option value="CIVIL">民法</option>
+    <option value="COMMERCIAL">商法</option>
+    <option value="CIVPRO">民事訴訟法</option>
+    <option value="PENAL" selected>刑法</option>
+    <option value="CRIMPRO">刑事訴訟法</option>
+  </select>
+  <div style="height:14px"></div>
+  <label for="year">年度</label>
+  <select id="year"><option value="ALL">全年度</option></select>
+  <div style="height:14px"></div>
+  <label for="mode">出題順</label>
+  <select id="mode">
+    <option value="normal">年度・問題順</option>
+    <option value="random">ランダム</option>
+    <option value="favorites">お気に入りのみ</option>
+  </select>
+  <div style="height:16px"></div>
+  <button id="start" class="primary" style="width:100%">学習開始</button>
+  <p class="subtle" id="counts"></p>
+</section>
+
+<section id="study" class="hidden">
+  <div class="topline">
+    <button id="home" class="ghost" style="padding:9px 12px">科目選択</button>
+    <span id="favorite" class="star">☆ お気に入り</span>
+  </div>
+  <div class="panel">
+    <div class="meta"><span id="position"></span><span id="subjectLabel"></span></div>
+    <div class="progress"><div id="bar" class="bar"></div></div>
+    <div id="stem" class="stem"></div>
+    <div id="statement" class="statement"></div>
+    <div id="answer" class="answer"></div>
+    <button id="reveal" class="primary" style="width:100%">答えを見る</button>
+  </div>
+  <div class="row">
+    <button id="prev" class="secondary">← 前へ</button>
+    <button id="next" class="primary">次へ →</button>
+  </div>
+  <p class="subtle" style="text-align:center;margin-top:12px">正誤は出題当時の判例・法令基準で作成しています。法改正等にご留意ください。</p>
+</section>
+
+<section id="error" class="panel hidden"></section>
+<footer>問題データはこのアプリ内に同梱されています。学習進捗・お気に入りはこの端末内に保存されます。</footer>
+</main>
+
+<script>
+const DATA_FILE="yobi_tantou_master.csv";
+const SUBJECT_NAMES={
+  CONSTITUTION:"憲法",
+  ADMIN:"行政法",
+  CIVIL:"民法",
+  COMMERCIAL:"商法",
+  CIVPRO:"民事訴訟法",
+  PENAL:"刑法",
+  CRIMPRO:"刑事訴訟法"
+};
+let all=[], deck=[], index=0, revealed=false, subject="PENAL";
+const $=id=>document.getElementById(id);
+
+function parseCSV(text){
+  const rows=[];let row=[],cell="",q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i],n=text[i+1];
+    if(c==='"'&&q&&n==='"'){cell+='"';i++}
+    else if(c==='"')q=!q;
+    else if(c===','&&!q){row.push(cell);cell=""}
+    else if((c==='
+'||c==='')&&!q){if(c===''&&n==='
+')i++;row.push(cell);if(row.some(x=>x!==""))rows.push(row);row=[];cell=""}
+    else cell+=c;
+  }
+  if(cell.length||row.length){row.push(cell);rows.push(row)}
+  const headers=rows.shift()||[];
+  return rows.map(r=>Object.fromEntries(headers.map((h,i)=>[h,r[i]??""])));
+}
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function favs(){try{return JSON.parse(localStorage.getItem("yobi-favs")||"[]")}catch{return[]}}
+function saveFavs(a){localStorage.setItem("yobi-favs",JSON.stringify(a))}
+function progressKey(){return "yobi-progress-"+subject}
+function showError(msg){$("error").classList.remove("hidden");$("error").textContent=msg}
+
+function updateCounts(){
+  const selSub=$("subject").value;
+  const selYear=$("year").value;
+  const filtered=all.filter(x=>x.subject_id===selSub && (selYear==="ALL" || x.year===selYear));
+  const summary=Object.entries(SUBJECT_NAMES)
+    .map(([k,v])=>`${v}:${all.filter(x=>x.subject_id===k).length}肢`)
+    .filter(s=>!s.endsWith(":0肢"))
+    .join(" ／ ");
+  $("counts").textContent=`選択中：${filtered.length}肢（収録合計：${summary}）`;
+}
+
+async function init(){
+  try{
+    const r=await fetch(DATA_FILE);if(!r.ok)throw Error("CSVを読み込めません");
+    all=parseCSV((await r.text()).replace(/^﻿/,""));
+    const years=[...new Set(all.map(x=>x.year))];
+    $("year").innerHTML=`<option value="ALL">全年度</option>`+years.map(y=>`<option value="${esc(y)}">${esc(y)}</option>`).join("");
+    if(years.length===1)$("year").value=years[0];
+    $("subject").onchange=updateCounts;
+    $("year").onchange=updateCounts;
+    updateCounts();
+  }catch(e){
+    showError("問題データの読み込みに失敗しました。CSVとアプリ本体が同じフォルダにあるか確認してください。");
+  }
+}
+
+function start(){
+  subject=$("subject").value;
+  const selYear=$("year").value;
+  let rows=all.filter(x=>x.subject_id===subject && (selYear==="ALL" || x.year===selYear));
+  if($("mode").value==="favorites")rows=rows.filter(x=>favs().includes(x.id));
+  if($("mode").value==="random")rows=[...rows].sort(()=>Math.random()-.5);
+  deck=rows;index=0;revealed=false;
+  if(!deck.length){alert("該当する問題がありません。");return}
+  $("setup").classList.add("hidden");$("study").classList.remove("hidden");render();
+}
+
+function render(){
+  const x=deck[index];if(!x)return;
+  $("position").textContent=`${index+1} / ${deck.length}肢`;
+  $("subjectLabel").textContent=`${x.year}・${SUBJECT_NAMES[x.subject_id]||x.subject_id} 第${x.question_no}問 ${x.branch}`;
+  $("bar").style.width=`${(index+1)/deck.length*100}%`;
+  $("stem").textContent=x.common_stem||"";
+  $("statement").textContent=x.statement||"";
+  $("answer").textContent=revealed?(x.answer_as_of_exam||"要確認"):"";
+  $("answer").className="answer"+(revealed?(x.answer_as_of_exam==="○"?" correct":x.answer_as_of_exam==="×"?" wrong":""):"");
+  $("reveal").classList.toggle("hidden",revealed);
+  $("favorite").textContent=favs().includes(x.id)?"★ お気に入り":"☆ お気に入り";
+  $("prev").disabled=index===0;$("next").disabled=index===deck.length-1;
+  const p=JSON.parse(localStorage.getItem(progressKey())||"{}");p[x.id]=true;localStorage.setItem(progressKey(),JSON.stringify(p));
+}
+
+$("start").onclick=start;
+$("reveal").onclick=()=>{revealed=true;render();$("reveal").classList.add("hidden")};
+$("next").onclick=()=>{if(index<deck.length-1){index++;revealed=false;render()}};
+$("prev").onclick=()=>{if(index>0){index--;revealed=false;render()}};
+$("home").onclick=()=>{$("study").classList.add("hidden");$("setup").classList.remove("hidden");updateCounts()};
+$("favorite").onclick=()=>{const x=deck[index],a=favs();const i=a.indexOf(x.id);if(i>=0)a.splice(i,1);else a.push(x.id);saveFavs(a);render()};
+init();
+if("serviceWorker" in navigator && location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+</script>
+</body>
+</html>
