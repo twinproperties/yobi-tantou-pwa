@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#14243a">
+<meta name="description" content="司法試験予備試験 短答 肢別○×学習">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="予備短答">
+<title>予備試験 短答 肢トレ</title>
+<style>
+:root{color-scheme:light;--ink:#172235;--muted:#697586;--line:#e2e7ed;--paper:#f4f6f8;--navy:#14243a;--green:#16834a;--red:#c43d3d}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}
+header{background:var(--navy);color:#fff;padding:calc(14px + env(safe-area-inset-top)) 18px 14px}
+h1{font-size:19px;margin:0;font-weight:750}header small{opacity:.75}
+main{max-width:680px;margin:0 auto;padding:18px 16px calc(28px + env(safe-area-inset-bottom))}
+.panel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:18px;margin:0 0 14px;box-shadow:0 2px 10px #14243a08}
+label{font-size:13px;color:var(--muted);display:block;margin-bottom:7px}
+select,button{font:inherit}select{width:100%;padding:13px;border:1px solid var(--line);border-radius:11px;background:#fff;color:var(--ink)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+button{border:0;border-radius:12px;padding:14px 12px;font-weight:700;cursor:pointer}
+.primary{background:var(--navy);color:#fff}.secondary{background:#edf1f5;color:var(--ink)}.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+button:disabled{opacity:.4;cursor:default}
+.meta{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px;margin-bottom:12px}
+.progress{height:5px;background:#e8edf1;border-radius:9px;overflow:hidden;margin-bottom:16px}.bar{height:100%;background:var(--green);width:0}
+.stem{font-size:13px;color:var(--muted);line-height:1.7;white-space:pre-wrap;margin-bottom:12px;overflow-wrap:anywhere}
+.stem.collapsed{max-height:5.1em;overflow:hidden;position:relative}
+.stemtoggle{font-size:12px;color:var(--navy);background:none;padding:0 0 10px;border-radius:0;font-weight:600}
+.branch{display:inline-block;background:var(--navy);color:#fff;border-radius:8px;padding:2px 10px;font-size:13px;font-weight:700;margin-bottom:8px}
+.statement{font-size:19px;line-height:1.9;white-space:pre-wrap;overflow-wrap:anywhere;margin-bottom:14px}
+.statement .exp{display:block;font-size:12px;color:var(--muted);line-height:1.6}
+.marknote{font-size:12px;color:var(--muted);margin-bottom:12px}
+.judge button{font-size:34px;padding:14px 0;background:#fff;border:2px solid var(--line);color:var(--ink)}
+.judge #maru{color:var(--green);border-color:#bfe3cf}.judge #batsu{color:var(--red);border-color:#f0c7c7}
+.result{margin-top:14px;padding:14px;border-radius:12px;background:#f7f9fb;border:1px solid var(--line)}
+.result .head{font-size:18px;font-weight:800;margin-bottom:4px}
+.result.ok .head{color:var(--green)}.result.ng .head{color:var(--red)}
+.result .big{font-size:56px;font-weight:800;line-height:1.1;text-align:center;margin:6px 0}
+.big.correct{color:var(--green)}.big.wrong{color:var(--red)}
+.result .sub{font-size:12px;color:var(--muted);line-height:1.7}
+.hidden{display:none!important}.subtle{font-size:12px;color:var(--muted);line-height:1.7}
+.topline{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.star{font-size:14px;cursor:pointer;padding:6px}
+footer{text-align:center;color:var(--muted);font-size:11px;padding:10px}
+#error{border-color:#e6b8b8;color:#8a2a2a;white-space:pre-wrap}
+.stats{margin-top:14px;font-size:13px;line-height:1.8}
+.linkbtn{background:none;color:var(--muted);font-weight:500;font-size:12px;text-decoration:underline;padding:10px 4px}
+@media(max-width:390px){.statement{font-size:17px}.panel{padding:15px}}
+</style>
+</head>
+<body>
+<header><h1>予備試験 短答 肢トレ</h1><small>見る・○×判断する・次へ</small></header>
+<main>
+<section id="setup" class="panel">
+  <h2 style="font-size:17px;margin:0 0 16px">学習条件を選択</h2>
+  <label for="subject">科目</label><select id="subject"></select>
+  <div style="height:14px"></div>
+  <label for="year">年度</label><select id="year"></select>
+  <div style="height:14px"></div>
+  <label for="mode">出題</label>
+  <select id="mode">
+    <option value="normal">問題順</option>
+    <option value="random">ランダム</option>
+    <option value="wrong">間違えた肢のみ</option>
+    <option value="unseen">未回答のみ</option>
+    <option value="favorites">お気に入りのみ</option>
+  </select>
+  <div style="height:16px"></div>
+  <button id="start" class="primary" style="width:100%">学習開始</button>
+  <div class="stats" id="stats"></div>
+  <p class="subtle" id="counts"></p>
+  <button id="reset" class="linkbtn">学習記録をリセット</button>
+</section>
+<section id="study" class="hidden">
+  <div class="topline"><button id="home" class="ghost" style="padding:9px 12px">条件選択</button><span id="favorite" class="star">☆ お気に入り</span></div>
+  <div class="panel">
+    <div class="meta"><span id="position"></span><span id="subjectLabel"></span></div>
+    <div class="progress"><div id="bar" class="bar"></div></div>
+    <div id="stem" class="stem"></div>
+    <button id="stemtoggle" class="stemtoggle hidden">▼ 設問文を全部読む</button>
+    <div><span id="branch" class="branch"></span></div>
+    <div id="statement" class="statement"></div>
+    <div id="marknote" class="marknote"></div>
+    <div id="judge" class="row judge"><button id="maru">○</button><button id="batsu">×</button></div>
+    <div id="result" class="result hidden"></div>
+    <div style="text-align:center"><button id="peek" class="linkbtn">答えだけ見る（記録しない）</button></div>
+  </div>
+  <div class="row">
+    <button id="prev" class="secondary">← 前へ</button>
+    <button id="next" class="primary">次へ →</button>
+  </div>
+  <p class="subtle" style="text-align:center;margin-top:12px">正誤は出題当時の解答から展開したデータです。現行法との照合は未完了です。</p>
+</section>
+<section id="error" class="panel hidden"></section>
+<footer>問題データはアプリ内に同梱。学習記録・お気に入りはこの端末内に保存されます。</footer>
+</main>
+<script src="questions.js"></script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const REC_KEY="yobi-tantou-rec-v1",FAV_KEY="yobi-tantou-fav-v1";
+let mem={};
+function load(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return mem[k]!==undefined?mem[k]:def}}
+function save(k,v){mem[k]=v;try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function recs(){return load(REC_KEY,{})}
+function favs(){return load(FAV_KEY,[])}
+function showError(m){$("error").classList.remove("hidden");$("error").textContent=m}
+let all=[],deck=[],index=0,state="ask";
+const SUBJ_LABEL={CRIMINAL:"刑法",CRIMPRO:"刑事訴訟法"};
+
+function init(){
+  if(!Array.isArray(window.QDATA)||!window.QDATA.length){
+    showError("問題データ(questions.js)を読み込めませんでした。\nindex.html と questions.js が同じ場所にあるか確認してください。");return}
+  all=window.QDATA;
+  const subs=[...new Set(all.map(x=>x.subject_id))];
+  $("subject").innerHTML='<option value="ALL">すべて</option>'+subs.map(s=>`<option value="${esc(s)}">${esc(all.find(x=>x.subject_id===s).subject)}</option>`).join("");
+  const years=[...new Set(all.map(x=>x.year))];
+  $("year").innerHTML='<option value="ALL">すべて</option>'+years.map(y=>`<option>${esc(y)}</option>`).join("");
+  drawStats();
+}
+function drawStats(){
+  const r=recs();let n=0,c=0,w=0;
+  all.forEach(x=>{const q=r[x.id];if(q){n++;q.last?c++:w++}});
+  $("stats").innerHTML=`回答済み <b>${n}</b> / ${all.length}肢　直近正解 <b style="color:var(--green)">${c}</b>　直近不正解 <b style="color:var(--red)">${w}</b>`;
+  const cnt={};all.forEach(x=>cnt[x.subject]=(cnt[x.subject]||0)+1);
+  $("counts").textContent="収録："+Object.entries(cnt).map(([k,v])=>`${k} ${v}肢`).join(" ／ ");
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function start(){
+  const s=$("subject").value,y=$("year").value,m=$("mode").value,r=recs(),f=favs();
+  let rows=all.filter(x=>(s==="ALL"||x.subject_id===s)&&(y==="ALL"||x.year===y));
+  if(m==="wrong")rows=rows.filter(x=>r[x.id]&&!r[x.id].last);
+  if(m==="unseen")rows=rows.filter(x=>!r[x.id]);
+  if(m==="favorites")rows=rows.filter(x=>f.includes(x.id));
+  if(m==="random")shuffle(rows);
+  if(!rows.length){alert("該当する問題がありません。");return}
+  deck=rows;index=0;
+  $("setup").classList.add("hidden");$("study").classList.remove("hidden");render();
+}
+function render(){
+  const x=deck[index];if(!x)return;
+  state="ask";
+  $("position").textContent=`${index+1} / ${deck.length}肢`;
+  $("subjectLabel").textContent=`${x.year}・${x.subject} 第${x.q_no}問`;
+  $("bar").style.width=`${(index+1)/deck.length*100}%`;
+  const st=$("stem");st.textContent=x.common_stem||"";
+  const long=(x.common_stem||"").length>260;
+  st.classList.toggle("collapsed",long);$("stemtoggle").classList.toggle("hidden",!long);
+  $("stemtoggle").textContent="▼ 設問文を全部読む";
+  $("branch").textContent=x.branch;
+  const parts=String(x.statement||"").split("\n\n");
+  $("statement").innerHTML=esc(parts[0])+(parts[1]?`<span class="exp">${esc(parts.slice(1).join("\n\n"))}</span>`:"");
+  $("marknote").textContent=x.mark||"";
+  $("judge").classList.remove("hidden");$("peek").classList.remove("hidden");
+  $("result").classList.add("hidden");
+  $("favorite").textContent=favs().includes(x.id)?"★ お気に入り":"☆ お気に入り";
+  $("prev").disabled=index===0;$("next").disabled=index===deck.length-1;
+  window.scrollTo(0,0);
+}
+function showResult(x,pick){
+  const ok=pick===null?null:pick===x.answer;
+  const el=$("result");
+  const head=ok===null?"答え":(ok?"正解！":"不正解…");
+  el.className="result "+(ok===null?"":ok?"ok":"ng");
+  el.innerHTML=`<div class="head">${head}${pick?`（あなた：${esc(pick)}）`:""}</div>
+  <div class="big ${x.answer==="○"?"correct":"wrong"}">${esc(x.answer)}</div>
+  <div class="sub">この問題の正解：${esc(x.official_answer||"－")}${x.full_answer?`<br>空欄の正解：${esc(x.full_answer)}`:""}<br>出典：${esc(x.status)}</div>`;
+  $("judge").classList.add("hidden");$("peek").classList.add("hidden");
+  state="shown";
+}
+function answer(pick){
+  const x=deck[index];if(state!=="ask")return;
+  const r=recs();const q=r[x.id]||{n:0,c:0};q.n++;if(pick===x.answer)q.c++;q.last=pick===x.answer;q.t=Date.now();r[x.id]=q;save(REC_KEY,r);
+  showResult(x,pick);
+}
+$("start").onclick=start;
+$("maru").onclick=()=>answer("○");
+$("batsu").onclick=()=>answer("×");
+$("peek").onclick=()=>showResult(deck[index],null);
+$("next").onclick=()=>{if(index<deck.length-1){index++;render()}};
+$("prev").onclick=()=>{if(index>0){index--;render()}};
+$("home").onclick=()=>{$("study").classList.add("hidden");$("setup").classList.remove("hidden");drawStats()};
+$("favorite").onclick=()=>{const x=deck[index],a=favs(),i=a.indexOf(x.id);if(i>=0)a.splice(i,1);else a.push(x.id);save(FAV_KEY,a);$("favorite").textContent=i>=0?"☆ お気に入り":"★ お気に入り"};
+$("stemtoggle").onclick=()=>{const st=$("stem");const c=st.classList.toggle("collapsed");$("stemtoggle").textContent=c?"▼ 設問文を全部読む":"▲ 閉じる"};
+$("reset").onclick=()=>{if(confirm("学習記録（正誤履歴）をリセットします。お気に入りは残ります。よろしいですか？")){save(REC_KEY,{});drawStats()}};
+init();
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+</script>
+</body>
+</html>
