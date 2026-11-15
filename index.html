@@ -52,7 +52,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:10px}
 </style>
 </head>
 <body>
-<header><h1>予備試験 短答 肢トレ</h1><small>見る・○×判断する・次へ</small></header>
+<header><h1>予備試験 短答 肢トレ</h1><small>見る・○×判断する・次へ　<span id="ver">v003</span></small></header>
 <main>
 <section id="setup" class="panel">
   <h2 style="font-size:17px;margin:0 0 16px">学習条件を選択</h2>
@@ -97,7 +97,8 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:10px}
 <section id="error" class="panel hidden"></section>
 <footer>問題データはアプリ内に同梱。学習記録・お気に入りはこの端末内に保存されます。</footer>
 </main>
-<script src="questions.js"></script>
+<script>window.addEventListener("error",function(e){var b=document.getElementById("error");if(b){b.classList.remove("hidden");b.textContent="エラー: "+e.message+"（"+(e.filename||"").split("/").pop()+":"+e.lineno+"）"}});</script>
+<script src="questions.js?v=3"></script>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
@@ -115,7 +116,7 @@ const SUBJ_LABEL={CRIMINAL:"刑法",CRIMPRO:"刑事訴訟法"};
 function init(){
   if(!Array.isArray(window.QDATA)||!window.QDATA.length){
     showError("問題データ(questions.js)を読み込めませんでした。\nindex.html と questions.js が同じ場所にあるか確認してください。");return}
-  all=window.QDATA;
+  all=window.QDATA;$("ver").textContent="v003・"+all.length+"肢";
   const subs=[...new Set(all.map(x=>x.subject_id))];
   $("subject").innerHTML='<option value="ALL">すべて</option>'+subs.map(s=>`<option value="${esc(s)}">${esc(all.find(x=>x.subject_id===s).subject)}</option>`).join("");
   const years=[...new Set(all.map(x=>x.year))];
@@ -188,7 +189,7 @@ $("favorite").onclick=()=>{const x=deck[index],a=favs(),i=a.indexOf(x.id);if(i>=
 $("stemtoggle").onclick=()=>{const st=$("stem");const c=st.classList.toggle("collapsed");$("stemtoggle").textContent=c?"▼ 設問文を全部読む":"▲ 閉じる"};
 $("reset").onclick=()=>{if(confirm("学習記録（正誤履歴）をリセットします。お気に入りは残ります。よろしいですか？")){save(REC_KEY,{});drawStats()}};
 init();
-if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(()=>{}));
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))window.addEventListener("load",()=>navigator.serviceWorker.register("./app-sw.js").catch(()=>{}));
 </script>
 </body>
 </html>
