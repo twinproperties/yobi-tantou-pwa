@@ -52,7 +52,7 @@ footer{text-align:center;color:var(--muted);font-size:11px;padding:10px}
 </style>
 </head>
 <body>
-<header><h1>予備試験 短答 肢トレ</h1><small>見る・○×判断する・次へ　<span id="ver">v004</span></small></header>
+<header><h1>予備試験 短答 肢トレ</h1><small>見る・○×判断する・次へ　<span id="ver">v005</span></small></header>
 <main>
 <section id="setup" class="panel">
   <h2 style="font-size:17px;margin:0 0 16px">学習条件を選択</h2>
@@ -115,10 +115,10 @@ const SUBJ_LABEL={CRIMINAL:"刑法",CRIMPRO:"刑事訴訟法"};
 const SUBJ_ORDER=["CONST","ADMIN","CIVIL","COMM","CIVPRO","CRIMINAL","CRIMPRO"];
 function yearRank(f){const m=f.match(/^([RH])(\d+)$/);return m?(m[1]==="R"?2018:1988)+ +m[2]:0}
 function candidates(){const a=[];for(let n=20;n>=1;n--)a.push("R"+String(n).padStart(2,"0"));for(let n=31;n>=20;n--)a.push("H"+n);return a}
-function loadYear(name){return new Promise(res=>{const s=document.createElement("script");s.src="data/"+name+".js?v=4";s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s)})}
+function loadYear(name){return new Promise(res=>{const s=document.createElement("script");s.src="data/"+name+".js?v=5";s.onload=()=>res(true);s.onerror=()=>res(false);document.head.appendChild(s)})}
 function init(){
   const subs=SUBJ_ORDER.filter(s=>all.some(x=>x.subject_id===s));
-  $("ver").textContent="v004・"+all.length+"肢";
+  $("ver").textContent="v005・"+all.length+"肢";
   $("subject").innerHTML='<option value="ALL">すべて</option>'+subs.map(s=>`<option value="${esc(s)}">${esc(all.find(x=>x.subject_id===s).subject)}</option>`).join("");
   const years=[...new Set(all.map(x=>x.year))];
   $("year").innerHTML='<option value="ALL">すべて</option>'+years.map(y=>`<option>${esc(y)}</option>`).join("");
