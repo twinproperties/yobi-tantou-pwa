@@ -1,12 +1,12 @@
-予備試験 短答 肢トレ v005（令和8・7・6年度 全7科目）
+予備試験 短答 肢トレ v006（令和8・7・6・5年度 全7科目）
 
 ■ ファイル構成（リポジトリ直下にそのままアップ）
 - index.html / sw.js / app-sw.js / manifest.webmanifest / .nojekyll
 - icons/ （icon-180.png, icon-192.png, icon-512.png）
-- data/ （R08.js = 令和8年度, R07.js = 令和7年度, R06.js = 令和6年度）
+- data/ （R08.js = 令和8年度, R07.js = 令和7年度, R06.js = 令和6年度, R05.js = 令和5年度）
 
 ■ 年度を増やすとき
-data フォルダに R06.js, R05.js … のように「R+年度2桁.js」（平成は H30.js 形式）を追加アップするだけ。
+data フォルダに R04.js, R03.js … のように「R+年度2桁.js」（平成は H30.js 形式）を追加アップするだけ。
 アプリが自動で読み込み、年度の選択肢に出ます（index.html の変更は不要）。
 反映されない時は app-sw.js の VERSION の数字を1つ上げてアップ。
 

@@ -1,5 +1,5 @@
 // 更新したら VERSION の数字を上げる（端末の古いキャッシュが入れ替わる）
-const VERSION="v5";
+const VERSION="v6";
 const CACHE="yobi-tantou-"+VERSION;
 const ASSETS=["./","./index.html","./manifest.webmanifest","./icons/icon-192.png","./icons/icon-512.png","./icons/icon-180.png"];
 self.addEventListener("install",e=>{self.skipWaiting();e.waitUntil(caches.open(CACHE).then(c=>Promise.allSettled(ASSETS.map(a=>c.add(a)))))});
